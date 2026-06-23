@@ -27,7 +27,7 @@ client = razorpay.Client(auth=("rzp_test_SzppdEzy51SPYd", "ZXV3p1lSRtZFXpt9wXac4
 from werkzeug.utils import secure_filename #used to check secured filenames or not
 import os
 
-mydb=connection.MySQLConnection(user='root',host='localhost',password='Dss@1023',db='ecom28db')
+mydb=connection.MySQLConnection(user='flaskuser',host='localhost',password='password',db='flaskdb')
 
 app=Flask(__name__)
 app.permanent_session_lifetime=timedelta(days=1)
