@@ -12,3 +12,4 @@ def send_mail(to,subject,body):
     server.send_message(msg)
     print('Mail Sent')
     server.close()
+    

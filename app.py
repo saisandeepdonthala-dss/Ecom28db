@@ -1345,7 +1345,7 @@ def forgotpassword():
     )
     count_email = cursor.fetchone()
     if count_email[0] == 1:
-        reset_link = f"http://127.0.0.1:5000/api/resetpassword/{endata(f_email)}"
+        reset_link = f"https://sandeep-ecom28db.duckdns.org/api/resetpassword/{endata(f_email)}"
         subject = "Reset Password Link"
         body = f"Click the link to reset password:\n{reset_link}"
         send_mail(
