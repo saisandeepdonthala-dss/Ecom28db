@@ -1337,69 +1337,68 @@ def addreview(itemid):
 @app.route('/api/forgotpassword', methods=['POST'])
 def forgotpassword():
     data = request.get_json()
-    f_email = data.get('email')
+    email = data.get("email")
+    if not email:
+        return {"status": "error","message": "Email is required" }, 400
     cursor = mydb.cursor(buffered=True)
     cursor.execute(
-        'select count(*) from userdata where useremail=%s',
-        [f_email]
+        "SELECT * FROM userdata WHERE useremail=%s",
+        (email,)
     )
-    count_email = cursor.fetchone()
-    if count_email[0] == 1:
-        reset_link = f"https://sandeep-ecom28db.duckdns.org/api/resetpassword/{endata(f_email)}"
-        subject = "Reset Password Link"
-        body = f"Click the link to reset password:\n{reset_link}"
-        send_mail(
-            to=f_email,
-            subject=subject,
-            body=body
-        )
-        return { "status": "success", "message": "Reset link sent successfully"}, 200
-    return {"status": "error","message": "Email not found"}, 404
-    
-
-@app.route('/api/resetpassword/<token>', methods=['GET', 'POST'])
-def resetpassword(token):
-
-    if request.method == "GET":
-      return redirect(f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}")
-
-    data = request.get_json()
-
-    npassword = data.get("password")
-    cpassword = data.get("confirm_password")
-
-    if npassword != cpassword:
+    user = cursor.fetchone()
+    if not user:
         return {
-            "status":"error",
-            "message":"Passwords do not match"
-        },400
-
+            "status": "error",
+            "message": "Email not found"
+        }, 404
+    token = endata(email)
+    # React URL
+    reset_link = f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}"
+    subject = "Password Reset"
+    body = f"""
+Hello,
+Click the link below to reset your password.
+{reset_link}
+Ignore this email if you didn't request a password reset.
+"""
+    send_mail(
+        to=email,
+        subject=subject,
+        body=body
+    )
+    return { "status": "success", "message": "Password reset link sent successfully"}, 200
+    
+@app.route('/api/resetpassword/<token>', methods=['POST'])
+def resetpassword(token):
     try:
         email = dndata(token)
-
-        hashed_pwd = bcrypt.generate_password_hash(npassword)
-
-        cursor = mydb.cursor(buffered=True)
-
-        cursor.execute(
-            "UPDATE userdata SET userpassword=%s WHERE useremail=%s",
-            (hashed_pwd,email)
-        )
-
-        mydb.commit()
-
+    except Exception:
         return {
-            "status":"success",
-            "message":"Password updated successfully"
-        },200
-
-    except Exception as e:
+            "status": "error",
+            "message": "Invalid or expired link"
+        }, 400
+    data = request.get_json()
+    password = data.get("password")
+    confirm_password = data.get("confirm_password")
+    if not password or not confirm_password:
         return {
-            "status":"error",
-            "message":str(e)
-        },400
-
-    finally:
-        cursor.close()  
+            "status": "error",
+            "message": "All fields are required"
+        }, 400
+    if password != confirm_password:
+        return {
+            "status": "error",
+            "message": "Passwords do not match"
+        }, 400
+    hashed = bcrypt.generate_password_hash(password).decode("utf-8")
+    cursor = mydb.cursor(buffered=True)
+    cursor.execute(
+        "UPDATE userdata SET userpassword=%s WHERE useremail=%s",
+        (hashed, email)
+    )
+    mydb.commit()
+    return {"status": "success","message": "Password updated successfully"}, 200
+    
+    
 if __name__=='__main__':
     app.run()
