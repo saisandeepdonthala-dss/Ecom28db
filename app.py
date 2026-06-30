@@ -1356,28 +1356,50 @@ def forgotpassword():
         return { "status": "success", "message": "Reset link sent successfully"}, 200
     return {"status": "error","message": "Email not found"}, 404
     
-@app.route('/api/resetpassword/<token>', methods=['POST'])
+
+@app.route('/api/resetpassword/<token>', methods=['GET','POST'])
 def resetpassword(token):
+
+    if request.method == "GET":
+        return redirect(f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}")
+
     data = request.get_json()
-    npassword = data.get('password')
-    cpassword = data.get('confirm_password')
+
+    npassword = data.get("password")
+    cpassword = data.get("confirm_password")
+
     if npassword != cpassword:
-        return {"status": "error", "message": "Passwords do not match" }, 400
+        return {
+            "status":"error",
+            "message":"Passwords do not match"
+        },400
+
     try:
         email = dndata(token)
-        hashed_pwd =  bcrypt.generate_password_hash(npassword)
+
+        hashed_pwd = bcrypt.generate_password_hash(npassword)
+
         cursor = mydb.cursor(buffered=True)
+
         cursor.execute(
-            'update userdata set userpassword=%s where useremail=%s',
-            [hashed_pwd, email]
+            "UPDATE userdata SET userpassword=%s WHERE useremail=%s",
+            (hashed_pwd,email)
         )
+
         mydb.commit()
-        return {"status": "success","message": "Password updated successfully"}, 200
+
+        return {
+            "status":"success",
+            "message":"Password updated successfully"
+        },200
+
     except Exception as e:
-        return {"status": "error","message": f"Invalid or expired token,{str(e)}"}, 400
+        return {
+            "status":"error",
+            "message":str(e)
+        },400
+
     finally:
-        if cursor:
-            cursor.close()
-        
+        cursor.close()  
 if __name__=='__main__':
     app.run()
