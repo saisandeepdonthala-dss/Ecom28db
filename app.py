@@ -1361,7 +1361,7 @@ def forgotpassword():
 def resetpassword(token):
 
     if request.method == "GET":
-        return redirect(f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}")
+        return redirect(f"https://sandeep-ecom28db.duckdns.org/api/resetpassword/{token}")
 
     data = request.get_json()
 
