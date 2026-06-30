@@ -1353,7 +1353,7 @@ def forgotpassword():
         }, 404
     token = endata(email)
     # React URL
-    reset_link = f"https://localhost:5173/resetpassword/{token}"
+    reset_link = f"http://localhost:5173/resetpassword/{token}"
     subject = "Password Reset"
     body = f"""
 Hello,
