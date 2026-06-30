@@ -1357,11 +1357,14 @@ def forgotpassword():
     return {"status": "error","message": "Email not found"}, 404
     
 
-@app.route('/api/resetpassword/<token>', methods=['GET','POST'])
+@app.route('/api/resetpassword/<token>', methods=['GET', 'POST'])
 def resetpassword(token):
 
     if request.method == "GET":
-        return redirect(f"https://sandeep-ecom28db.duckdns.org/api/resetpassword/{token}")
+        return redirect(
+            f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}"
+        )
+
 
     data = request.get_json()
 
