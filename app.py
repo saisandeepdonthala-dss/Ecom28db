@@ -1334,71 +1334,106 @@ def addreview(itemid):
         if cursor:
             cursor.close()
             
-@app.route('/api/forgotpassword', methods=['POST'])
+@app.route("/api/forgotpassword", methods=["POST"])
 def forgotpassword():
     data = request.get_json()
+
     email = data.get("email")
+
     if not email:
-        return {"status": "error","message": "Email is required" }, 400
+        return {
+            "status": "error",
+            "message": "Email is required"
+        }, 400
+
     cursor = mydb.cursor(buffered=True)
     cursor.execute(
         "SELECT * FROM userdata WHERE useremail=%s",
         (email,)
     )
+
     user = cursor.fetchone()
+
     if not user:
         return {
             "status": "error",
             "message": "Email not found"
         }, 404
+
     token = endata(email)
-    # React URL
+
+    # React page (NOT Flask API)
     reset_link = f"http://localhost:5173/resetpassword/{token}"
+
     subject = "Password Reset"
+
     body = f"""
 Hello,
+
 Click the link below to reset your password.
+
 {reset_link}
-Ignore this email if you didn't request a password reset.
+
+If you didn't request this, please ignore this email.
 """
+
     send_mail(
         to=email,
         subject=subject,
         body=body
     )
-    return { "status": "success", "message": "Password reset link sent successfully"}, 200
-    
-@app.route('/api/resetpassword/<token>', methods=['POST'])
+
+    return {
+        "status": "success",
+        "message": "Password reset link sent successfully"
+    }, 200
+
+
+# -------------------------------
+# Reset Password API
+# -------------------------------
+@app.route("/api/resetpassword/<token>", methods=["POST"])
 def resetpassword(token):
+
     try:
         email = dndata(token)
     except Exception:
         return {
             "status": "error",
-            "message": "Invalid or expired link"
+            "message": "Invalid or expired token"
         }, 400
+
     data = request.get_json()
+
     password = data.get("password")
     confirm_password = data.get("confirm_password")
+
     if not password or not confirm_password:
         return {
             "status": "error",
             "message": "All fields are required"
         }, 400
+
     if password != confirm_password:
         return {
             "status": "error",
             "message": "Passwords do not match"
         }, 400
+
     hashed = bcrypt.generate_password_hash(password).decode("utf-8")
+
     cursor = mydb.cursor(buffered=True)
+
     cursor.execute(
         "UPDATE userdata SET userpassword=%s WHERE useremail=%s",
         (hashed, email)
     )
+
     mydb.commit()
-    return {"status": "success","message": "Password updated successfully"}, 200
-    
-    
+
+    return {
+        "status": "success",
+        "message": "Password updated successfully"
+    }, 200
 if __name__=='__main__':
     app.run()
