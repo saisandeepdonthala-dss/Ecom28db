@@ -1365,7 +1365,6 @@ def resetpassword(token):
             f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}"
         )
 
-
     data = request.get_json()
 
     npassword = data.get("password")
