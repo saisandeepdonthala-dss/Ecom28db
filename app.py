@@ -1364,7 +1364,7 @@ def forgotpassword():
 
     # React page (NOT Flask API)
     reset_link = f"http://localhost:5173/resetpassword/{token}"
-
+    print("Reset Link:", reset_link)
     subject = "Password Reset"
 
     body = f"""
