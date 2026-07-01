@@ -1363,7 +1363,7 @@ def forgotpassword():
     token = endata(email)
 
     # React page (NOT Flask API)
-    reset_link = f"http://localhost:5173/resetpassword/{token}"
+    reset_link = f"https://sandeep-ecom28db.duckdns.org/resetpassword/{token}"
     print("Reset Link:", reset_link)
     subject = "Password Reset"
 
