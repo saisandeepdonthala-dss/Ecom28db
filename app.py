@@ -1336,6 +1336,7 @@ def addreview(itemid):
             
 @app.route("/api/forgotpassword", methods=["POST"])
 def forgotpassword():
+
     data = request.get_json()
 
     email = data.get("email")
@@ -1347,6 +1348,7 @@ def forgotpassword():
         }, 400
 
     cursor = mydb.cursor(buffered=True)
+
     cursor.execute(
         "SELECT * FROM userdata WHERE useremail=%s",
         (email,)
@@ -1362,9 +1364,9 @@ def forgotpassword():
 
     token = endata(email)
 
-    # React page (NOT Flask API)
+    # Change this to your frontend URL
     reset_link = f"http://localhost:5173/resetpassword/{token}"
-    print("Reset Link:", reset_link)
+
     subject = "Password Reset"
 
     body = f"""
@@ -1374,29 +1376,40 @@ Click the link below to reset your password.
 
 {reset_link}
 
-If you didn't request this, please ignore this email.
+If you did not request this password reset, please ignore this email.
+
+Regards,
+ShopEase Team
 """
 
-    send_mail(
-        to=email,
-        subject=subject,
-        body=body
-    )
+    try:
+        send_mail(
+            to=email,
+            subject=subject,
+            body=body
+        )
 
-    return {
-        "status": "success",
-        "message": "Password reset link sent successfully"
-    }, 200
+        return {
+            "status": "success",
+            "message": "Password reset link sent successfully"
+        }, 200
 
+    except Exception as e:
+        print("EMAIL ERROR:", e)
 
-# -------------------------------
+        return {
+            "status": "error",
+            "message": "Unable to send email"
+        }, 500
+
 # Reset Password API
-# -------------------------------
+
 @app.route("/api/resetpassword/<token>", methods=["POST"])
 def resetpassword(token):
 
     try:
         email = dndata(token)
+
     except Exception:
         return {
             "status": "error",
@@ -1435,5 +1448,6 @@ def resetpassword(token):
         "status": "success",
         "message": "Password updated successfully"
     }, 200
+    
 if __name__=='__main__':
     app.run()
